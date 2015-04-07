@@ -14,9 +14,19 @@ InModuleScope $ModuleName {
       Ensure = 'Present'
     }
     context 'validates if the share exists'{
-      mock Get-SmbShare -mockwith {Write-Error 'No such share.'}
       it 'returns false when the share is not present' {
+        mock Get-SmbShare -mockwith {Write-Error 'No such share.'}
         test-targetresource @TargetResourceParams | should be $false
+      }
+      it 'returns true when the share is present' {
+        mock Get-SmbShare -mockwith {
+          [pscustomobject]@{
+            Name = 'PesterTest'
+            Path = 'c:\Pester'
+          }
+        }
+        mock Get-SmbShareAccess -mockwith {}
+        test-targetresource @TargetResourceParams | should be $true
       }
     }
   }
