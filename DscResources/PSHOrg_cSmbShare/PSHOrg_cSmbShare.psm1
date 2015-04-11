@@ -42,7 +42,7 @@ function Test-Permissions
 	)
 
    
-
+   
     $testResult = $false
 
     $PSBound = $PSBoundParameters
@@ -51,7 +51,6 @@ function Test-Permissions
     $PSBound.Remove('DependsOn') | Out-Null
 
 ## getting current permissions assigned to the shares 
-
 
 $smbShare = Get-SmbShare -Name $Name -ErrorAction SilentlyContinue
 
@@ -195,7 +194,7 @@ $numbernoaccess = $PSBound.noaccess.count
 	 
 
   $RemovingUserPermission = @{}  
-  $Testingcorrectperrmission = @()
+  $TestingcorrectperrmissionAndparameters = @()
   $AddingUserPermission = @{}
  
 
@@ -216,7 +215,7 @@ If   ($PSBound.ContainsKey('noaccess')){
 
 ## If the user should not have permission we will add him to this  Variable 
      
-     $Testingcorrectperrmission += $result
+     $TestingcorrectperrmissionAndparameters += $result
 
      $RemovingUserPermission.add($user,$result)
       
@@ -238,7 +237,7 @@ If   ($PSBound.ContainsKey('fullaccess')){
 
      if($user){
 
-     $Testingcorrectperrmission += $result
+     $TestingcorrectperrmissionAndparameters += $result
      
 ## If the user should not have permission we will add him to this  Variable 
 
@@ -268,7 +267,7 @@ If   ($PSBound.ContainsKey('readaccess')){
       if($user){
 
 ## If the user should not have permission we will add him to this  Variable 
-        $Testingcorrectperrmission += $result
+        $TestingcorrectperrmissionAndparameters += $result
 
      $RemovingUserPermission.add($user,$result)
       
@@ -289,7 +288,7 @@ If   ($PSBound.ContainsKey('ChangeAccess')){
 
      if($user){
 
-     $Testingcorrectperrmission += $result
+     $TestingcorrectperrmissionAndparameters += $result
 
 ## If the user should not have permission we will add him to this  Variable 
 
@@ -322,7 +321,7 @@ If   ($PSBound.ContainsKey('noaccess')){
 
 ## If the User should should have permission we will  add him to this Variable
 
-      $Testingcorrectperrmission += $result
+      $TestingcorrectperrmissionAndparameters += $result
       $addeduser = $PSBound.NoAccess
       $AddingUserPermission.add($addeduser[$i],$result)
 
@@ -352,7 +351,7 @@ If   ($PSBound.ContainsKey('readaccess')){
 
 ## If the User should should have permission we will  add him to this Variable
 
-      $Testingcorrectperrmission += $result
+      $TestingcorrectperrmissionAndparameters += $result
 
       $addeduser = $PSBound.readaccess
 
@@ -385,7 +384,7 @@ If   ($PSBound.ContainsKey('fullaccess')){
 
 ## If the User should should have permission we will  add him to this Variable
 
-     $Testingcorrectperrmission += $result
+     $TestingcorrectperrmissionAndparameters += $result
 
       $addeduser = $PSBound.fullaccess
       $AddingUserPermission.add($addeduser[$i],$result)
@@ -418,7 +417,7 @@ If   ($PSBound.ContainsKey('ChangeAccess')){
 
       
 ## we are adding user to Variable      
-      $Testingcorrectperrmission += $result
+      $TestingcorrectperrmissionAndparameters += $result
 
       $addeduser = $PSBound.ChangeAccess
   
@@ -519,19 +518,19 @@ $CurrentConfiguration.Remove('ConcurrentUserLimit')
 
 $ListofCurrentParam = $CurrentConfiguration.keys -join ' ' -split ' '
 
-## Aswell comparing if there is extra parameters and assign it to $Testingcorrectperrmission
+## Aswell comparing if there is extra parameters and assign it to $TestingcorrectperrmissionAndparameters
 
 foreach ($listparam in $ListofCurrentParam) {  if($CurrentConfiguration[$listparam]){
 
 $trial =     $CurrentConfiguration.GetEnumerator() |Where-Object { $_.name -eq $listparam } | select value -ExpandProperty value
 $RemovingUserPermission.add($trial,"False")
 
-$Testingcorrectperrmission += "False"
+$TestingcorrectperrmissionAndparameters += "False"
 
 }else{
 
 
-$Testingcorrectperrmission += "True"
+$TestingcorrectperrmissionAndparameters += "True"
 
 } }
 
@@ -632,7 +631,7 @@ for ($i = 0; $i -lt $PSBoundParameter.Count ; $i++)
 ## This result Specifie if there is any changes  from assigned and current configuration
 ## If there is false in the list then there is something wrong with configuration 
 
-$global:finaltest =$OtherParamResult + $issuefounded + $configparam  + $Testingcorrectperrmission
+$global:finalresult =$OtherParamResult  + $TestingcorrectperrmissionAndparameters
 
 
 }
@@ -795,7 +794,7 @@ function Set-TargetResource
 
 		[ValidateSet('AccessBased','Unrestricted')]
 		[System.String]
-		$FolderEnumerationMode,
+		$FolderEnumerationMode="Unrestricted",
 
 		[System.String[]]
 		$FullAccess,
@@ -1014,10 +1013,7 @@ Test-Permissions @specifedParam
                      
                                                             }
 
-                                                            
-
-
-
+      
         }
     }#finish Presnet
     else 
@@ -1055,7 +1051,7 @@ function Test-TargetResource
 
 		[ValidateSet('AccessBased','Unrestricted')]
 		[System.String]
-		$FolderEnumerationMode,
+		$FolderEnumerationMode="Unrestricted",
 
 		[System.String[]]
 		$FullAccess,
@@ -1106,7 +1102,7 @@ Write-Verbose 'Testing perrmisions'
         {
             $testResult = $false
         }
-        elseif ($share -ne $null -and $finaltest -contains 'false' )
+        elseif ($share -ne $null -and $finalresult -contains 'false' )
 
 
         {
